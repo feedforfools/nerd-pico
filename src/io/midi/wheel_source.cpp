@@ -18,7 +18,7 @@ void WheelSource::onPitchBendChange(int16_t value)
     event.channel = MIDI_CHANNEL_PRIMARY;
     event.value = value;
     
-    Logger::log("Pitch Bend Event: " + String(event.value));
+    // Logger::log("Pitch Bend Event: " + String(event.value));
     fireEvent(event);
 }
 
@@ -31,6 +31,6 @@ void WheelSource::onModulationChange(uint8_t value)
     event.data1 = MODULATION_CC_NUMBER;
     event.data2 = value;
 
-    Logger::log("Modulation Event: " + String(event.data2));
+    // Logger::log("Modulation Event: " + String(event.data2));
     fireEvent(event);
 }

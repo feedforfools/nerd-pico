@@ -39,7 +39,7 @@ void AnalogReader::readPitchBend()
     int32_t rawValue = adc->adc0->analogRead(PIN_PITCH_BEND);
 
     // Exponential smoothing filter
-    filteredPitchValue = (0.1 * rawValue) + (0.9 * filteredPitchValue);
+    filteredPitchValue = (0.01 * rawValue) + (0.99 * filteredPitchValue);
 
     // Check if the wheel has been actively moved
     if (abs(filteredPitchValue - PITCH_CAL_CENTER) > PITCH_ACTIVE_THRESHOLD)
@@ -81,15 +81,40 @@ void AnalogReader::readModulation()
     int32_t rawValue = adc->adc0->analogRead(PIN_MODULATION);
 
     // Exponential smoothing filter
-    filteredModValue = (0.2 * rawValue) + (0.8 * filteredModValue);
+    filteredModValue = (0.01 * rawValue) + (0.99 * filteredModValue);
 
-    // Map current raw value to 7-bit modulation range
-    uint8_t midiValue = map(filteredModValue, MOD_CAL_MIN, MOD_CAL_MAX, 0, 127);
-    midiValue = constrain(midiValue, 0, 127);
-
-    if (abs(midiValue - lastSentModValue) > MOD_ACTIVE_THRESHOLD)
+    // Check if the modulation wheel has been actively moved
+    if (abs(filteredModValue - MOD_CAL_MIN) > MOD_ACTIVE_THRESHOLD)
     {
-        if (listener) listener->onModulationChange(midiValue);
-        lastSentModValue = midiValue;
-    }   
+        modLastMoveTime = millis();
+        if (isModAtRest)
+        {
+            isModAtRest = false;
+        }
+
+        // Map current raw value to 7-bit modulation range
+        uint8_t midiValue = map(filteredModValue, MOD_CAL_MIN, MOD_CAL_MAX, 0, 127);
+        midiValue = constrain(midiValue, 0, 127);
+
+        if (midiValue != lastSentModValue)
+        {
+            if (listener) listener->onModulationChange(midiValue);
+            lastSentModValue = midiValue;
+        }
+    }
+    else
+    {
+        // Modulation wheel is near the minimum => check if it should be considered at rest
+        if (!isModAtRest && (millis() - modLastMoveTime > TIME_TO_REST_MS))
+        {
+            isModAtRest = true;
+            // Snap to digital minimum
+            if (lastSentModValue != 0)
+            {
+                if (listener) listener->onModulationChange(0);
+                lastSentModValue = 0;
+            }
+            filteredModValue = MOD_CAL_MIN; // Reset filtered value to minimum
+        }
+    }
 }

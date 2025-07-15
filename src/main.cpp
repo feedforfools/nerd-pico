@@ -15,7 +15,7 @@ UsbMidiSink usbMidiSink;
 void setup()
 {
 	Serial.begin(9600);
-	while (!Serial && millis() < 4000); // Wait for serial connection
+	delay(4000);
 	Logger::log("\n--- Nerd Pico initializing ---");
 
 	// Initialize components
@@ -34,5 +34,4 @@ void setup()
 void loop()
 {
 	analogReader.update();
-	usbMIDI.read();
 }

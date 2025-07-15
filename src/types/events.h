@@ -1,5 +1,5 @@
-#ifndef EVENETS_H
-#define EVENETS_H
+#ifndef EVENTS_H
+#define EVENTS_H
 
 #include "port_id.h"
 
@@ -19,7 +19,7 @@ struct MusicalEvent
     uint8_t data1;
     uint8_t data2;
     // Pitch bend events uses value as 14-bit value (0-16383)
-    uint16_t value;
+    int16_t value;
 };
 
 #endif
