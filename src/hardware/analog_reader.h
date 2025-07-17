@@ -24,12 +24,12 @@ class AnalogReader
         ADC* adc;
         IAnalogControlListener* listener = nullptr;
 
-        int32_t filteredPitchValue;
+        float filteredPitchValue;
         int16_t lastSentPitchValue;
         bool isPitchAtRest;
         unsigned long pitchLastMoveTime;
 
-        int32_t filteredModValue;
+        float filteredModValue;
         uint8_t lastSentModValue;
         bool isModAtRest;
         unsigned long modLastMoveTime;

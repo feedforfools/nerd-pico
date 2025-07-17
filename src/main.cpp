@@ -1,7 +1,9 @@
 #include <Arduino.h>
+
 #include <MIDI.h>
 
 #include "config/config.h"
+#include "core/calibration.h"
 #include "core/interfaces.h"
 #include "hardware/analog_reader.h"
 #include "io/midi/wheel_source.h"
@@ -14,9 +16,12 @@ UsbMidiSink usbMidiSink;
 
 void setup()
 {
-	Serial.begin(9600);
-	delay(4000);
+	Logger::begin(9600);
 	Logger::log("\n--- Nerd Pico initializing ---");
+
+#if defined(RUN_CALIBRATION_ON_BOOT) && defined(HAVE_USB_SERIAL)
+	Calibration::run();
+#endif
 
 	// Initialize components
 	analogReader.init();
@@ -28,7 +33,7 @@ void setup()
 	wheelSource.registerListener(&usbMidiSink);
 	
 	Logger::log("--- Initialization complete ---");
-	Serial.flush();
+	Logger::flush();
 }
 
 void loop()

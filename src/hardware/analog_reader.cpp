@@ -1,16 +1,19 @@
 #include "analog_reader.h"
 
 #include "config/config.h"
+#include "core/calibration.h"
 #include "utils/logger.h"
 
 AnalogReader::AnalogReader() :
     adc(new ADC()),
-    filteredPitchValue(PITCH_CAL_CENTER),
+    filteredPitchValue(calibrationData.pitchBend.center),
     lastSentPitchValue(0),
     isPitchAtRest(true),
     pitchLastMoveTime(0),
-    filteredModValue(MOD_CAL_MIN),
-    lastSentModValue(0)
+    filteredModValue(calibrationData.modulation.min),
+    lastSentModValue(0),
+    isModAtRest(true),
+    modLastMoveTime(0)
 {}
 
 void AnalogReader::init()
@@ -19,6 +22,9 @@ void AnalogReader::init()
     adc->adc0->setAveraging(ADC_AVERAGING);
     adc->adc0->setConversionSpeed(ADC_CONV_SPEED);
     adc->adc0->setSamplingSpeed(ADC_SAMP_SPEED);
+
+    pinMode(PIN_PITCH_BEND, INPUT);
+    pinMode(PIN_MODULATION, INPUT);
 
     Logger::log("AnalogReader initialized");
 }
@@ -39,20 +45,18 @@ void AnalogReader::readPitchBend()
     int32_t rawValue = adc->adc0->analogRead(PIN_PITCH_BEND);
 
     // Exponential smoothing filter
-    filteredPitchValue = (0.01 * rawValue) + (0.99 * filteredPitchValue);
+    filteredPitchValue = (SMOOTHING_ALPHA * rawValue) + ((1 - SMOOTHING_ALPHA) * filteredPitchValue);
 
     // Check if the wheel has been actively moved
-    if (abs(filteredPitchValue - PITCH_CAL_CENTER) > PITCH_ACTIVE_THRESHOLD)
+    if (abs(filteredPitchValue - calibrationData.pitchBend.center) > PITCH_ACTIVE_THRESHOLD)
     {
         pitchLastMoveTime = millis();
-        if (isPitchAtRest)
-        {
-            isPitchAtRest = false;
-        }
+        isPitchAtRest = false;
 
+        // Constrain read values to prevent out-of-bounds errors
+        int32_t constrainedValue = constrain(filteredPitchValue, calibrationData.pitchBend.min, calibrationData.pitchBend.max);
         // Map current raw value to 14-bit pitch bend range
-        int16_t midiValue = map(filteredPitchValue, PITCH_CAL_MIN, PITCH_CAL_MAX, -8192, 8191);
-        midiValue = constrain(midiValue, -8192, 8191);
+        int16_t midiValue = map(constrainedValue, calibrationData.pitchBend.min, calibrationData.pitchBend.max, -8192, 8191);
 
         if (midiValue != lastSentPitchValue)
         {
@@ -72,6 +76,7 @@ void AnalogReader::readPitchBend()
                 if (listener) listener->onPitchBendChange(0);
                 lastSentPitchValue = 0;
             }
+            filteredPitchValue = calibrationData.pitchBend.center;
         }
     }
 }
@@ -81,20 +86,18 @@ void AnalogReader::readModulation()
     int32_t rawValue = adc->adc0->analogRead(PIN_MODULATION);
 
     // Exponential smoothing filter
-    filteredModValue = (0.01 * rawValue) + (0.99 * filteredModValue);
+    filteredModValue = (SMOOTHING_ALPHA * rawValue) + ((1 - SMOOTHING_ALPHA) * filteredModValue);
 
     // Check if the modulation wheel has been actively moved
-    if (abs(filteredModValue - MOD_CAL_MIN) > MOD_ACTIVE_THRESHOLD)
+    if (abs(filteredModValue - calibrationData.modulation.min) > MOD_ACTIVE_THRESHOLD)
     {
         modLastMoveTime = millis();
-        if (isModAtRest)
-        {
-            isModAtRest = false;
-        }
+        isModAtRest = false;
 
+        // Constrain read values to prevent out-of-bounds errors
+        int32_t constrainedValue = constrain(filteredModValue, calibrationData.modulation.min, calibrationData.modulation.max);
         // Map current raw value to 7-bit modulation range
-        uint8_t midiValue = map(filteredModValue, MOD_CAL_MIN, MOD_CAL_MAX, 0, 127);
-        midiValue = constrain(midiValue, 0, 127);
+        uint8_t midiValue = map(constrainedValue, calibrationData.modulation.min, calibrationData.modulation.max, 0, 127);
 
         if (midiValue != lastSentModValue)
         {
@@ -114,7 +117,7 @@ void AnalogReader::readModulation()
                 if (listener) listener->onModulationChange(0);
                 lastSentModValue = 0;
             }
-            filteredModValue = MOD_CAL_MIN; // Reset filtered value to minimum
+            filteredModValue = calibrationData.modulation.min;
         }
     }
 }
