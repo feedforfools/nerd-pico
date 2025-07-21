@@ -4,6 +4,10 @@
 #include <Arduino.h>
 #include <ADC.h>
 
+#include "algorithms/adaptive_ema.h"
+#include "algorithms/hysteresis_deadzone.h"
+#include "algorithms/stability_control.h"
+
 class IAnalogControlListener
 {
     public:
@@ -24,11 +28,13 @@ class AnalogReader
         ADC* adc;
         IAnalogControlListener* listener = nullptr;
 
-        float filteredPitchValue;
+        // Pitch bend filtering and control
+        AdaptiveEMA<6, 3, uint32_t> pitchFilter;
+        HysteresisDeadzone pitchDeadzone;
+        StabilityControl pitchStability;
         int16_t lastSentPitchValue;
-        bool isPitchAtRest;
-        unsigned long pitchLastMoveTime;
 
+        // Modulation wheel filtering and control
         float filteredModValue;
         uint8_t lastSentModValue;
         bool isModAtRest;

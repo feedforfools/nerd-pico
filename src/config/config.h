@@ -8,7 +8,8 @@
 // #define RUN_CALIBRATION_ON_BOOT
 
 // Uncomment this line to enable Serial logging
-// #define ENABLE_LOGGING
+#define ENABLE_LOGGING
+#define HAVE_USB_SERIAL
 
 // Pin configuration
 const uint8_t PIN_PITCH_BEND = A8;
