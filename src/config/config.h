@@ -8,8 +8,8 @@
 // #define RUN_CALIBRATION_ON_BOOT
 
 // Uncomment this line to enable Serial logging
-#define ENABLE_LOGGING
-#define HAVE_USB_SERIAL
+// #define ENABLE_LOGGING
+// #define HAVE_USB_SERIAL
 
 // Pin configuration
 const uint8_t PIN_PITCH_BEND = A8;
@@ -20,24 +20,11 @@ const uint8_t MIDI_CHANNEL_PRIMARY = 1;
 const uint8_t MODULATION_CC_NUMBER = 1;
 
 // Logic constants
-const float SMOOTHING_ALPHA = 0.02;                 // Exponential smoothing factor for analog readings
-const int PITCH_ACTIVE_THRESHOLD = 50;              // Helps prevent jitter
-const int MOD_ACTIVE_THRESHOLD = 50;                // Helps prevent jitter
-const unsigned long TIME_TO_REST_MS = 25;           // Time the wheel must be stable before it's considered at rest and snapped to digital center
-
-/*
-// Pitch bend calibration and logic
-// TODO: these values should be determined by a calibration routine; for now they are hardcoded
-const int PITCH_CAL_MIN = 1012;
-const int PITCH_CAL_MAX = 3116;
-const int PITCH_CAL_CENTER = 2168;
-
-// Modulation wheel \calibration and logic
-// TODO: these values should be determined by a calibration routine; for now they are hardcoded
-const int MOD_CAL_MIN = 2080;
-const int MOD_CAL_MAX = 3450;
-*/
-
+const float SMOOTHING_ALPHA = 0.02;                     // Exponential smoothing factor for analog readings
+const int MOD_ACTIVE_THRESHOLD = 50;                    // Helps prevent jitter
+const unsigned long TIME_TO_REST_MS = 25;               // Time the wheel must be stable before it's considered at rest and snapped to digital center
+const int PITCH_MIDI_SENSITIVITY = 32;                  // Minimum change in 14-bit value to send an update
+const unsigned long MIN_PITCH_SEND_INTERVAL_MS = 10;    // Minimum time between sending pitch bend messages (10ms = 100Hz)
 
 // ADC configuration
 #define ADC_RESOLUTION 12                                   // 12-bit resolution (0-4095)

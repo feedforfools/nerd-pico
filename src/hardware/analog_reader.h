@@ -33,6 +33,7 @@ class AnalogReader
         HysteresisDeadzone pitchDeadzone;
         StabilityControl pitchStability;
         int16_t lastSentPitchValue;
+        unsigned long lastPitchSendTime;
 
         // Modulation wheel filtering and control
         float filteredModValue;

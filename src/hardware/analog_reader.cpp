@@ -16,6 +16,7 @@ AnalogReader::AnalogReader() :
     pitchDeadzone(50, 100),
     pitchStability(PITCH_STABILITY_THRESHOLD_ADC, PITCH_TIME_TO_SETTLE_MS),
     lastSentPitchValue(0),
+    lastPitchSendTime(0),
     filteredModValue(0.0f),
     lastSentModValue(0),
     isModAtRest(true),
@@ -87,10 +88,17 @@ void AnalogReader::readPitchBend()
 
     if (shouldSendMidi && midiValue != lastSentPitchValue)
     {
-        if (listener) listener->onPitchBendChange(midiValue);
-        lastSentPitchValue = midiValue;
-        
-        // Logger::log("Pitch: %d, Filt: %d, MIDI: %d, Active: %d", rawValue, filteredValue, midiValue, pitchDeadzone.isActive());
+        unsigned long now = millis();
+        int delta = abs(midiValue - lastSentPitchValue);
+
+        // Send if the value change is significant OR enough time has passed since the last send
+        if ((delta >= PITCH_MIDI_SENSITIVITY) || (now - lastPitchSendTime > MIN_PITCH_SEND_INTERVAL_MS))
+        {
+            if (listener) listener->onPitchBendChange(midiValue);
+            lastSentPitchValue = midiValue;
+            lastPitchSendTime = now;
+            // Logger::log("Pitch: %d, Filt: %d, MIDI: %d, Active: %d", rawValue, filteredValue, midiValue, pitchDeadzone.isActive());
+        }
     }
 }
 
