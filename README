@@ -1,0 +1,64 @@
+# Nerd Pico
+
+Nerd Pico is a high-performance, firmware-based USB MIDI controller for the Teensy 4.0, designed to convert analog joystick or wheel inputs into precise Pitch Bend and Modulation MIDI data.
+
+It serves as a dedicated, standalone controller module, perfect for DIY synth projects or for integrating with larger systems like its sister project, **[Nerd Organ XP](https://github.com/feedforfools/nerd-organ-xp)**. The firmware focuses on providing exceptionally stable and responsive control through advanced filtering and signal processing algorithms.
+
+## Core Features
+
+*   **High-Resolution Pitch Bend & Modulation:** Outputs standard 7-bit CC for modulation and high-resolution 14-bit MIDI for pitch bend, providing smooth and expressive control.
+*   **Advanced Analog Filtering:**
+    *   **Adaptive Filtering:** Employs an Adaptive Exponential Moving Average (EMA) filter that provides strong, stable readings when a wheel is at rest and responsive, low-latency tracking during active use.
+    *   **Hysteresis Deadzone:** Eliminates jitter around the center position, preventing accidental MIDI messages when the joystick is not in use.
+    *   **Smart Stall Detection:** Automatically snaps the pitch wheel to a perfect digital center (zero) even if the physical potentiometer doesn't return perfectly, preventing unwanted pitch drift after a bend.
+*   **Interactive Serial Calibration:** A simple, guided routine via the Serial Monitor allows you to perfectly calibrate the minimum, maximum, and center points for your specific analog hardware, ensuring the full range of your controller is used.
+*   **Easily Configurable:** Key parameters like MIDI channel, CC numbers, pin assignments, and filter sensitivity are all defined in a central configuration file (`src/config/config.h`).
+*   **Modular Architecture:** Built with a clean `Source` -> `Sink` event architecture, making the code easy to understand and extend.
+
+## Hardware Requirements
+
+*   **Microcontroller:** **Teensy 4.0**
+*   **Inputs:** Two analog inputs for pitch bend and modulation (e.g., a 2-axis joystick or two separate potentiometers/wheels).
+*   **Connections:** By default, the firmware expects the inputs to be connected to:
+    *   `A8` (Pin 22) for Pitch Bend
+    *   `A9` (Pin 23) for Modulation
+
+## Building and Usage
+
+This project is configured for [PlatformIO](https://platformio.org/).
+
+1.  Install [Visual Studio Code](https://code.visualstudio.com/).
+2.  Install the [PlatformIO IDE extension](https://platformio.org/platformio-ide) from the VS Code marketplace.
+3.  Clone this repository to your local machine.
+4.  Open the cloned project folder in VS Code.
+
+### Build Environments
+
+The `platformio.ini` file defines three distinct environments:
+
+*   `[env:prod]`
+    *   The standard, high-performance build. It acts as a class-compliant USB MIDI device with no serial logging to ensure maximum speed. **This is the one to use for normal operation.**
+*   `[env:calib]`
+    *   A special build used **only for running the calibration routine**. It enables USB Serial communication and automatically starts the calibration process on boot.
+*   `[env:debug]`
+    *   A build for troubleshooting. It acts as a USB MIDI + Serial device and prints detailed log messages to the Serial Monitor.
+
+### How to Calibrate Your Controller
+
+To ensure the firmware matches your specific joystick or wheels, you must run the one-time calibration routine:
+
+1.  In VS Code, select the **`calib`** environment in the PlatformIO toolbar.
+2.  Build and Upload the firmware to your Teensy 4.0.
+3.  Open the **Serial Monitor** (set the baud rate to 9600).
+4.  Follow the on-screen prompts, moving the joystick to its limits and pressing a key to confirm each step.
+5.  The routine will output the captured ADC values for min, max, and center. These values are used for the current session but are not saved permanently.
+6.  **For a permanent change:** Copy the new values from the Serial Monitor and paste them into the `PitchBendCalibration` and `ModulationCalibration` structs in `src/core/calibration.h`.
+7.  Finally, switch back to the **`prod`** environment and upload it to the Teensy for normal use.
+
+## Ecosystem & Future Plans
+
+Nerd Pico is a component of the larger **Nerd Organ** modular synthesizer ecosystem. It is designed to be a plug-and-play controller, providing high-quality wheel data to a host device like a computer or the **[Nerd Organ XP](https://github.com/feedforfools/nerd-organ-xp)**, which can act as a USB MIDI Host and route its events.
+
+## Contributing
+
+Contributions are welcome! If you have an idea for a new feature, a bug fix, or an improvement, please feel free to open an issue to discuss it or submit a pull request.
