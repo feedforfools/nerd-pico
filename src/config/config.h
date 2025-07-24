@@ -3,14 +3,6 @@
 
 #include <Arduino.h>
 
-// Uncomment this line to run calibration routine on every boot
-// It needs Serial monitor to follow the steps, so it should only be used for development
-// #define RUN_CALIBRATION_ON_BOOT
-
-// Uncomment this line to enable Serial logging
-// #define ENABLE_LOGGING
-// #define HAVE_USB_SERIAL
-
 // Pin configuration
 const uint8_t PIN_PITCH_BEND = A8;
 const uint8_t PIN_MODULATION = A9;
