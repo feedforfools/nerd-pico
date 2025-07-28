@@ -8,7 +8,7 @@
 
 #define PITCH_STABILITY_THRESHOLD_ADC 4
 #define PITCH_STALL_CHECK_ZONE_ADC 80
-#define PITCH_TIME_TO_SETTLE_MS 250
+#define PITCH_TIME_TO_SETTLE_MS 150
 
 AnalogReader::AnalogReader() :
     adc(new ADC()),

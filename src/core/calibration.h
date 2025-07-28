@@ -14,7 +14,7 @@ struct PitchBendCalibration
 struct ModulationCalibration
 {
     // Default values for modulation calibration => overwritten by calibration routine
-    int min = 2045;
+    int min = 2100;
     int max = 3455;
 };
 
