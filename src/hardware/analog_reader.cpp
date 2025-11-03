@@ -20,7 +20,8 @@ AnalogReader::AnalogReader() :
     filteredModValue(0.0f),
     lastSentModValue(0),
     isModAtRest(true),
-    modLastMoveTime(0)
+    modLastMoveTime(0),
+    lastModSendTime(0)
 {}
 
 void AnalogReader::init()
@@ -122,8 +123,16 @@ void AnalogReader::readModulation()
 
         if (midiValue != lastSentModValue)
         {
-            if (listener) listener->onModulationChange(midiValue);
-            lastSentModValue = midiValue;
+            unsigned long now = millis();
+            int delta = abs(midiValue - lastSentModValue);
+            
+            // Send if the value change is significant OR enough time has passed
+            if ((delta >= MOD_MIDI_SENSITIVITY) || (now - lastModSendTime > MIN_MOD_SEND_INTERVAL_MS))
+            {
+                if (listener) listener->onModulationChange(midiValue);
+                lastSentModValue = midiValue;
+                lastModSendTime = now;
+            }
         }
     }
     else

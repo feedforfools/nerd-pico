@@ -40,6 +40,7 @@ class AnalogReader
         uint8_t lastSentModValue;
         bool isModAtRest;
         unsigned long modLastMoveTime;
+        unsigned long lastModSendTime;
 
         void readPitchBend();
         void readModulation();

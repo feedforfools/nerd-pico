@@ -15,8 +15,11 @@ const uint8_t MODULATION_CC_NUMBER = 1;
 const float SMOOTHING_ALPHA = 0.02;                     // Exponential smoothing factor for analog readings
 const int MOD_ACTIVE_THRESHOLD = 50;                    // Helps prevent jitter
 const unsigned long TIME_TO_REST_MS = 25;               // Time the wheel must be stable before it's considered at rest and snapped to digital center
-const int PITCH_MIDI_SENSITIVITY = 75;                  // Minimum change in 14-bit value to send an update
-const unsigned long MIN_PITCH_SEND_INTERVAL_MS = 10;    // Minimum time between sending pitch bend messages (10ms = 100Hz)
+const int PITCH_MIDI_SENSITIVITY = 150;                  // Minimum change in 14-bit value to send an update
+const unsigned long MIN_PITCH_SEND_INTERVAL_MS = 50;    // Changed for slower hosts => (50ms = 20Hz)
+const int MOD_MIDI_SENSITIVITY = 3;                      // Minimum change in 7-bit value to send (out of 0-127)
+const unsigned long MIN_MOD_SEND_INTERVAL_MS = 50;      // Same rate limiting as pitch bend (50ms = 20Hz)
+
 
 // ADC configuration
 #define ADC_RESOLUTION 12                                   // 12-bit resolution (0-4095)
